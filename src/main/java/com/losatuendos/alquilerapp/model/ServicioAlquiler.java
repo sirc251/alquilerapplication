@@ -36,4 +36,51 @@ public class ServicioAlquiler {
     )
     private List<Prenda> prendas = new ArrayList<>();
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public LocalDate getFechaSolic() {
+        return fechaSolic;
+    }
+
+    public void setFechaSolic(LocalDate fechaSolic) {
+        this.fechaSolic = fechaSolic;
+    }
+
+    public LocalDate getFechaAlqui() {
+        return fechaAlqui;
+    }
+
+    public void setFechaAlqui(LocalDate fechaAlqui) {
+        this.fechaAlqui = fechaAlqui;
+    }
+
+    public Cliente getCliente() {
+        return cliente;
+    }
+
+    public void setCliente(Cliente cliente) {
+        this.cliente = cliente;
+    }
+
+    public Empleado getEmpleado() {
+        return empleado;
+    }
+
+    public void setEmpleado(Empleado empleado) {
+        this.empleado = empleado;
+    }
+
+    public List<Prenda> getPrendas() {
+        return prendas;
+    }
+
+    public void setPrendas(List<Prenda> prendas) {
+        this.prendas = prendas;
+    }
 }

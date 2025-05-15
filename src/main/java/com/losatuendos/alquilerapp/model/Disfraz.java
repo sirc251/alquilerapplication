@@ -11,4 +11,12 @@ import lombok.Setter;
 @DiscriminatorValue("DISFRAZ")
 public class Disfraz extends Prenda {
     private String nombre;
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
 }

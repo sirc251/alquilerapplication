@@ -45,7 +45,8 @@ public class NegocioAlquilerFacade {
             PrendaRepository prendaRepo,
             ServicioAlquilerRepository servicioRepo,
             ServicioAlquilerIDGenerator idGen,
-            Map<String, PrendaFactory> factoryMap
+            Map<String, PrendaFactory> factoryMap,
+            Map<String, LavadoImplementacion> lavadoImplMap
     ) {
         this.clienteRepo = clienteRepo;
         this.empleadoRepo = empleadoRepo;

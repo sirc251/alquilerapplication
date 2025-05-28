@@ -7,8 +7,8 @@ import org.springframework.stereotype.Service;
 //Bridge pattern
 @Service
 public class ProcesoLavado {
-    private final LavadoImplementacion impl;
-    public ProcesoLavado(@Qualifier("estandar") LavadoImplementacion impl){
+    private final LavadoStrategy impl;
+    public ProcesoLavado(@Qualifier("estandar") LavadoStrategy impl){
         this.impl = impl;
     }
     public void lavar(LotePrendas lote){

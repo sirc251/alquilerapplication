@@ -9,6 +9,8 @@ import java.util.Map;
 import com.losatuendos.alquilerapp.dto.ClienteDTO;
 import com.losatuendos.alquilerapp.dto.EmpleadoDTO;
 import com.losatuendos.alquilerapp.pattern.*;
+import com.losatuendos.alquilerapp.pattern.observer.AdministradorLoggerObserver;
+import com.losatuendos.alquilerapp.pattern.observer.ServicioAlquilerNotifier;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,7 +36,8 @@ public class NegocioAlquilerFacade {
     private final ServicioAlquilerRepository servicioRepo;
     private final ServicioAlquilerIDGenerator idGen;
     private final Map<String, PrendaFactory> factoryMap;
-    Map<String, LavadoImplementacion> lavadoImplMap;
+    Map<String, LavadoStrategy> lavadoImplMap;
+    private final ServicioAlquilerNotifier notifier;
 
     /** Cola de lavandería en memoria */
     private final List<PrendaComponent> lavanderiaQueue = new ArrayList<>();
@@ -46,7 +49,9 @@ public class NegocioAlquilerFacade {
             ServicioAlquilerRepository servicioRepo,
             ServicioAlquilerIDGenerator idGen,
             Map<String, PrendaFactory> factoryMap,
-            Map<String, LavadoImplementacion> lavadoImplMap
+            Map<String, LavadoStrategy> lavadoImplMap,
+            ServicioAlquilerNotifier notifier,
+            AdministradorLoggerObserver administradorLoggerObserver
     ) {
         this.clienteRepo = clienteRepo;
         this.empleadoRepo = empleadoRepo;
@@ -55,6 +60,8 @@ public class NegocioAlquilerFacade {
         this.idGen = idGen;
         this.factoryMap = factoryMap;
         this.lavadoImplMap    = lavadoImplMap;
+        this.notifier = notifier;
+        this.notifier.subscribe(administradorLoggerObserver);
     }
 
     //========================================
@@ -152,7 +159,9 @@ public class NegocioAlquilerFacade {
         servicio.setFechaAlqui(fechaAlqui);
         servicio.setPrendas(prendas);
 
-        return servicioRepo.save(servicio);
+        ServicioAlquiler savedServicio = servicioRepo.save(servicio);
+        this.notifier.notify("NUEVO_ALQUILER", savedServicio);
+        return savedServicio;
     }
 
     //========================================
@@ -231,7 +240,7 @@ public class NegocioAlquilerFacade {
     public List<Prenda> enviarPrendasALavanderia(
             int cantidad, String tipoProceso
     ) {
-        LavadoImplementacion impl = lavadoImplMap.get(tipoProceso);
+        LavadoStrategy impl = lavadoImplMap.get(tipoProceso);
         if (impl == null) {
             throw new IllegalArgumentException(
                     "Proceso de lavado desconocido: " + tipoProceso);
@@ -248,13 +257,13 @@ public class NegocioAlquilerFacade {
         impl.lavar(lote);
 
         // 3) Quitar de la cola
-        List<PrendaComponent> enviados = new ArrayList<>(
+        List<PrendaComponent> componentesEnviados = new ArrayList<>(
                 lavanderiaQueue.subList(0, toIndex)
         );
         lavanderiaQueue.subList(0, toIndex).clear();
 
         // 4) Devolver la lista de Prenda (extraída de los componentes)
-        return enviados.stream()
+        List<Prenda> prendasEnviadas = componentesEnviados.stream()
                 .map(comp -> {
                     if (comp instanceof PrendaLeaf leaf) {
                         return leaf.getPrenda();
@@ -265,6 +274,9 @@ public class NegocioAlquilerFacade {
                     }
                 })
                 .collect(Collectors.toList());
+        
+        this.notifier.notify("LAVANDERIA_COMPLETADA", prendasEnviadas);
+        return prendasEnviadas;
     }
 
 }

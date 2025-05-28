@@ -3,7 +3,7 @@ package com.losatuendos.alquilerapp.pattern;
 import org.springframework.stereotype.Component;
 
 @Component
-public class LavanderiaExternaAdapter implements LavadoImplementacion {
+public class LavanderiaExternaAdapter implements LavadoStrategy {
     private final LavanderiaExterna external = new LavanderiaExterna();
     @Override
     public void lavar(LotePrendas lote){
